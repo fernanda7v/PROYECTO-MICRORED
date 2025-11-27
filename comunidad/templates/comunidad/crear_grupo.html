@@ -1,0 +1,36 @@
+{% extends 'comunidad/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Fundar un Nuevo Grupo</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Crea un espacio para conectar con vecinos que compartan tus intereses o vivan en tu zona.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre del Grupo</label>
+                        {{ form.nombre }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción</label>
+                        {{ form.descripcion }}
+                        <small class="text-muted">Explica brevemente el propósito del grupo.</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Crear Grupo</button>
+                        <a href="{% url 'lista_grupos' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

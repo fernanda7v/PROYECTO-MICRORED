@@ -1,0 +1,52 @@
+{% extends 'comunidad/base.html' %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'detalle_grupo' publicacion.grupo.id %}" class="text-decoration-none">&larr; Volver al Grupo</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="card-title">{{ publicacion.titulo }}</h2>
+        <h6 class="text-muted">Por {{ publicacion.autor.username }} | {{ publicacion.fecha_publicacion|date:"d M Y H:i" }}</h6>
+        <p class="card-text fs-5 mt-3">{{ publicacion.contenido }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <h4>Comentarios</h4>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.contenido }}
+                    <button type="submit" class="btn btn-success btn-sm mt-2">Comentar</button>
+                </form>
+            </div>
+        </div>
+
+        {% for comentario in comentarios %}
+        <div class="d-flex mb-3">
+            <div class="flex-shrink-0">
+                <div class="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                    {{ comentario.autor.username|slice:":1"|upper }}
+                </div>
+            </div>
+            <div class="flex-grow-1 ms-3">
+                <div class="card bg-light border-0">
+                    <div class="card-body py-2">
+                        <strong class="d-block text-dark">{{ comentario.autor.username }}</strong>
+                        <span class="text-muted small">{{ comentario.fecha_comentario|timesince }} atrás</span>
+                        <p class="mb-0 mt-1">{{ comentario.contenido }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">Nadie ha comentado aún. ¡Sé el primero!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

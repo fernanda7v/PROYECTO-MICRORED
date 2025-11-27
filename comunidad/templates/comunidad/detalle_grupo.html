@@ -1,0 +1,130 @@
+{% extends 'comunidad/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div>
+        <a href="{% url 'lista_grupos' %}" class="text-decoration-none small">&larr; Volver a Grupos</a>
+        
+        <div class="d-flex align-items-center gap-3 mt-1">
+            <h2 class="mb-0">{{ grupo.nombre }}</h2>
+            
+            {% if user.is_staff %}
+            <a href="{% url 'eliminar_grupo' grupo.id %}" 
+               class="btn btn-danger btn-sm"
+               onclick="return confirm('⚠️ ¡PELIGRO! ⚠️\n\n¿Estás seguro de borrar EL GRUPO ENTERO?\n\nSe borrarán todas las publicaciones y comentarios dentro de él permanentemente.')">
+                🗑️ Borrar Grupo
+            </a>
+            {% endif %}
+        </div>
+        
+        <p class="text-muted mb-0 mt-2">{{ grupo.descripcion }}</p>
+    </div>
+    
+    <div>
+        {% if es_miembro %}
+            <a href="{% url 'salir_grupo' grupo.id %}" class="btn btn-outline-danger btn-sm">Salir del Grupo</a>
+        {% else %}
+            <a href="{% url 'unirse_grupo' grupo.id %}" class="btn btn-success">Unirme al Grupo</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        
+        {% if es_miembro %}
+        <div class="card mb-4 p-3 bg-light border-0">
+            <h5 class="mb-3">📢 Publicar algo nuevo</h5>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-2">
+                    {{ form.titulo }}
+                </div>
+                <div class="mb-2">
+                    {{ form.contenido }}
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Publicar</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center shadow-sm">
+            🔒 Para publicar noticias o ver detalles completos, <strong>únete al grupo</strong>.
+        </div>
+        {% endif %}
+
+        <h4 class="mb-3">Muro de Noticias</h4>
+        {% for publicacion in publicaciones %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h4 class="card-title">{{ publicacion.titulo }}</h4>
+                    
+                    {% if user.is_staff %}
+                    <a href="{% url 'eliminar_publicacion' publicacion.id %}" 
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('¿Estás seguro de eliminar esta publicación?')">
+                        🗑️ Borrar
+                    </a>
+                    {% endif %}
+                </div>
+
+                <h6 class="card-subtitle mb-2 text-muted">
+                    Por <strong>{{ publicacion.autor.username }}</strong> | {{ publicacion.fecha_publicacion|date:"d M Y H:i" }}
+                </h6>
+                <p class="card-text mt-3">{{ publicacion.contenido }}</p>
+                
+                <hr>
+                <a href="{% url 'detalle_publicacion' publicacion.id %}" class="btn btn-sm btn-outline-primary">
+                    💬 Ver Comentarios ({{ publicacion.comentarios.count }})
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info text-center">
+            Aún no hay publicaciones en este grupo.
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <span>👥 Miembros</span>
+                <span class="badge bg-light text-dark">{{ grupo.miembros.count }}</span>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for miembro in grupo.miembros.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        👤 {{ miembro.username }}
+                        {% if miembro.is_staff %} <span class="badge bg-primary" style="font-size: 0.7em;">Admin</span> {% endif %}
+                    </span>
+
+                    {% if user.is_staff and miembro != user %}
+                    <a href="{% url 'expulsar_miembro' grupo.id miembro.id %}" 
+                       class="text-danger text-decoration-none fw-bold px-2"
+                       onclick="return confirm('¿Expulsar a {{ miembro.username }} del grupo?')"
+                       title="Expulsar usuario">
+                        ❌
+                    </a>
+                    {% endif %}
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Nadie se ha unido aún.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card mt-3 bg-light border-0">
+            <div class="card-body small text-muted">
+                <p class="mb-1"><strong>Normas:</strong></p>
+                <ul class="ps-3 mb-0">
+                    <li>Sé respetuoso.</li>
+                    <li>No spam.</li>
+                    <li>Temas relevantes al grupo.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
